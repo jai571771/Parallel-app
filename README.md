@@ -83,8 +83,8 @@ This applies [supabase/migrations/20261029000000_init.sql](supabase/migrations/2
 ### 7. Store the Gemini key as a server secret
 ```bash
 npx supabase secrets set GEMINI_API_KEY=your-gemini-key
-# optional: choose a different model (default: gemini-3.8-flash)
-npx supabase secrets set GEMINI_MODEL=gemini-3.5-flash-lite
+# optional: choose a different model (default: gemini-3.5-flash-lite — fast enough for the 150s function limit)
+npx supabase secrets set GEMINI_MODEL=gemini-3.5-flash-lite GEMINI_THINKING_LEVEL=minimal
 ```
 
 ### 8. Deploy the Edge Functions

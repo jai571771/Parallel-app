@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { colors } from '@/theme';
 
 // (tabs)/index owns "/", so the signed-out group starts on /welcome.
-export const unstable_settings = { initialRouteName: 'welcome' };
+export const unstable_settings = { anchor: 'welcome' };
 
 export default function AuthLayout() {
   return (

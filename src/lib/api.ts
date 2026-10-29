@@ -10,8 +10,12 @@ export class LimitError extends Error {
 }
 
 async function invoke<T>(name: string, body: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke(name, { body });
+  // The server gives up at ~150s; never leave the user on an endless spinner.
+  const { data, error } = await supabase.functions.invoke(name, { body, timeout: 160_000 });
   if (error) {
+    if (error.name === 'FunctionsFetchError' || /abort|timeout/i.test(error.message)) {
+      throw new Error('This is taking longer than expected. Please check your connection and try again.');
+    }
     let payload: { error?: string; code?: string; limit?: string } | null = null;
     if (error instanceof FunctionsHttpError) {
       try {

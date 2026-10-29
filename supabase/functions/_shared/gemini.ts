@@ -2,6 +2,10 @@ import { HttpError } from './http.ts';
 
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
 
+// Edge Functions are killed at 150s; stop calling Gemini well before that so the
+// user gets a clear error instead of a dropped connection.
+const DEADLINE_MS = 120_000;
+
 /** Rules every PARALLEL generation follows (from the concept doc's trust & safety section). */
 export const SYSTEM_RULES = `You are the scenario engine for PARALLEL, an app that helps people explore possible versions of their future.
 
@@ -30,35 +34,57 @@ export async function generateJson<T>({
 }): Promise<T> {
   const key = Deno.env.get('GEMINI_API_KEY');
   if (!key) throw new HttpError(500, 'The AI service is not configured yet (missing GEMINI_API_KEY).');
-  const model = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.8-flash';
+  const model = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash-lite';
+  // Heavier models/thinking levels can blow the 150s Edge Function limit; keep it minimal.
+  const thinkingLevel = Deno.env.get('GEMINI_THINKING_LEVEL') ?? 'minimal';
 
   let useSchema = true;
+  let useThinking = true;
   let lastError = '';
+  const deadline = Date.now() + DEADLINE_MS;
 
   for (let attempt = 0; attempt < 3; attempt++) {
-    const res = await fetch(`${ENDPOINT}/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_RULES }] },
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature,
-          responseMimeType: 'application/json',
-          ...(useSchema ? { responseSchema: schema } : {}),
-        },
-      }),
-    });
+    const remaining = deadline - Date.now();
+    if (remaining < 10_000) break;
+
+    const started = Date.now();
+    let res: Response;
+    try {
+      res = await fetch(`${ENDPOINT}/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        signal: AbortSignal.timeout(remaining),
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_RULES }] },
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature,
+            responseMimeType: 'application/json',
+            ...(useSchema ? { responseSchema: schema } : {}),
+            ...(useThinking ? { thinkingConfig: { thinkingLevel } } : {}),
+          },
+        }),
+      });
+    } catch (e) {
+      console.error(`Gemini ${model} attempt ${attempt + 1} aborted after ${Date.now() - started}ms`, e);
+      throw new HttpError(504, 'The AI took too long to respond. Please try again.');
+    }
+    console.log(`Gemini ${model} attempt ${attempt + 1}: HTTP ${res.status} in ${Date.now() - started}ms`);
 
     if (!res.ok) {
       lastError = `${res.status} ${await res.text()}`;
       console.error('Gemini error', lastError);
       if (res.status === 429) throw new HttpError(503, 'The AI is busy right now. Please try again in a minute.');
       if (res.status === 404) throw new HttpError(500, `AI model "${model}" was not found. Set GEMINI_MODEL to a current model.`);
-      // If the schema itself was rejected, fall back to plain JSON mode with the schema described in the prompt.
-      if (res.status === 400 && useSchema) {
-        useSchema = false;
-        prompt += `\n\nReturn JSON matching this schema exactly:\n${JSON.stringify(schema)}`;
+      if (res.status === 400) {
+        // Drop optional config the model rejected: thinking level first, then the schema
+        // (falling back to plain JSON mode with the schema described in the prompt).
+        if (useThinking && /thinking/i.test(lastError)) {
+          useThinking = false;
+        } else if (useSchema) {
+          useSchema = false;
+          prompt += `\n\nReturn JSON matching this schema exactly:\n${JSON.stringify(schema)}`;
+        }
       }
       continue;
     }
