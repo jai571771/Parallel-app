@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient, type User } from 'npm:@supabase/supabase-js@2';
+import { aiTrace } from './gemini.ts';
 
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,7 +44,11 @@ export function serve(handler: (req: Request, body: Record<string, unknown>) => 
     if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
     try {
       const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-      return await handler(req, body);
+      aiTrace.length = 0;
+      const res = await handler(req, body);
+      // Opt-in timing info for debugging slow AI calls (no content, just status + ms).
+      if (req.headers.get('x-debug') === '1') res.headers.set('x-ai-trace', aiTrace.join(' | ').slice(0, 1000));
+      return res;
     } catch (e) {
       if (e instanceof HttpError) return json({ error: e.message, ...e.extra }, e.status);
       console.error(e);

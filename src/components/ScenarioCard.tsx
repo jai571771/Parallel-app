@@ -6,7 +6,8 @@ import { colors, pathColors, spacing } from '@/theme';
 import { Card, Label, T } from './ui';
 
 export function scenarioLabel(s: Pick<Scenario, 'kind' | 'position'>) {
-  return s.kind === 'baseline' ? 'Familiar path' : `Alternative ${s.position}`;
+  if (s.kind === 'baseline') return '🏠 If nothing changes';
+  return s.position === 1 ? '✨ If you choose differently' : `✨ Another choice (${s.position})`;
 }
 
 export function scenarioColor(s: Pick<Scenario, 'position'>) {
@@ -48,11 +49,11 @@ export function ScenarioCard({
         {!compact ? (
           <View style={{ gap: spacing.xs, marginTop: spacing.xs }}>
             <T variant="small" color={colors.textFaint}>
-              THE PREMISE
+              WHAT YOU DO
             </T>
             <T>{scenario.premise}</T>
             <T variant="small" color={colors.textFaint} style={{ marginTop: spacing.sm }}>
-              MAIN TRADE-OFF
+              WHAT YOU GET / GIVE UP
             </T>
             <T color={colors.textMuted}>{scenario.tradeoff}</T>
           </View>

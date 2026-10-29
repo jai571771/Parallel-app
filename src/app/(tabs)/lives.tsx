@@ -70,7 +70,7 @@ export default function Lives() {
               {scenarios.map((s) => (
                 <Pressable key={s.id} onPress={() => router.push(`/scenario/${s.id}`)} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                   <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: scenarioColor(s) }} />
-                  <T style={{ flex: 1 }}>{s.title}</T>
+                  <T style={{ flex: 1 }}>{s.emoji ? `${s.emoji} ` : ''}{s.title}</T>
                   <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
                 </Pressable>
               ))}

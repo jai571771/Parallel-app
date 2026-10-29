@@ -6,6 +6,7 @@ import { Button, Card, Chip, Disclaimer, ErrorBox, Field, Label, Loading, Screen
 import { generateSnapshot, LimitError } from '@/lib/api';
 import { updateProfile } from '@/lib/data';
 import { useAuth, useUser } from '@/providers/AuthProvider';
+import { useGame } from '@/providers/GameProvider';
 import { colors, radius, spacing } from '@/theme';
 
 const STAGES = ['School student', 'College student', 'Early career', 'Mid career', 'Founder / freelancer', 'Career break', 'Other'];
@@ -32,6 +33,7 @@ export default function Onboarding() {
   const isEdit = edit === '1';
   const { user, profile } = useUser();
   const { refreshProfile } = useAuth();
+  const { award } = useGame();
 
   const [step, setStep] = useState(0);
   const [stage, setStage] = useState(profile?.stage ?? '');
@@ -94,6 +96,7 @@ export default function Onboarding() {
       });
       await updateProfile(user.id, { onboarded: true });
       await refreshProfile();
+      award('welcome', 'welcome');
       router.replace(`/reveal/${snapshotId}`);
     } catch (e) {
       if (e instanceof LimitError) {

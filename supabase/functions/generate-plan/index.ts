@@ -46,10 +46,10 @@ The user wants to move toward this path:
 Premise: ${scenario.premise}
 What it requires: ${(scenario.requirements ?? []).join('; ')}
 
-Create a realistic starter action plan.
-- "title": short, motivating (max 8 words).
-- "summary": 1–2 sentences on the focus of the next few weeks.
-- "tasks": ${isPlus ? '8–12 tasks spread over weeks 1–6, including 2–3 milestones' : '4–6 tasks over weeks 1–2, including 1 milestone'}. Each task is small, specific and doable within the user's available time (${profile?.hours_available ?? 'a little'} hours/day). "detail" is one helpful sentence. "is_milestone" marks a meaningful checkpoint.
+Create a simple starter plan, like small quests in a game.
+- "title": short and motivating, max 6 simple words.
+- "summary": one short sentence about what the next few weeks are for.
+- "tasks": ${isPlus ? '8–12 tasks spread over weeks 1–6, including 2–3 milestones' : '4–6 tasks over weeks 1–2, including 1 milestone'}. Each "title" starts with an emoji and a verb, max 10 simple words (e.g. "📚 Watch one 15-minute coding video"). Each task fits in the user's free time (${profile?.hours_available ?? 'a little'} hours/day). "detail" is one simple sentence on how to do it. "is_milestone" marks a big moment worth celebrating.
 - "review_in_weeks": when they should review progress (${isPlus ? '2–6' : '2'}).
 Do not promise outcomes.`;
 

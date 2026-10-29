@@ -3,7 +3,7 @@ import type { ComponentRef, Ref } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { Scenario } from '@/lib/types';
 import { colors, radius, spacing } from '@/theme';
-import { LifeMap } from './LifeMap';
+import { LifeScene } from './LifeScene';
 import { scenarioColor } from './ScenarioCard';
 import { T } from './ui';
 
@@ -27,7 +27,7 @@ export function ShareCard({
   theme = 'night',
   ref,
 }: {
-  paths: Pick<Scenario, 'title' | 'tagline' | 'position'>[];
+  paths: Pick<Scenario, 'title' | 'tagline' | 'position' | 'scene' | 'emoji'>[];
   question: string;
   theme?: ShareTheme;
   ref?: Ref<ShareCardRef>;
@@ -39,12 +39,12 @@ export function ShareCard({
         <T variant="h2">
           {paths.length > 1 ? `${paths.length === 2 ? 'Two' : paths.length} possible lives. One choice.` : 'The life I almost chose.'}
         </T>
-        <LifeMap branches={paths.map((p) => ({ color: scenarioColor(p) }))} height={120} animate={false} />
         <View style={styles.row}>
           {paths.map((p, i) => {
             const c = scenarioColor(p);
             return (
               <View key={i} style={[styles.path, { borderColor: c, backgroundColor: c + '1F' }]}>
+                <LifeScene scene={p.scene} color={c} emoji={p.emoji} height={90} animate={false} />
                 <T variant="label" color={c} numberOfLines={2}>{p.title}</T>
                 <T variant="small" color={colors.text}>{p.tagline}</T>
               </View>

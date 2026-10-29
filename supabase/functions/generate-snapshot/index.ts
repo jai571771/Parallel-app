@@ -60,7 +60,7 @@ serve(async (req, raw) => {
 The user already explored these paths in this snapshot:
 ${existing}
 
-Create ONE new alternative life path that is clearly different from the paths above.
+Create ONE new possible life that is clearly different from the lives above.
 ${decision ? `The decision to explore: <decision>${decision}</decision>` : 'Choose the most meaningful different decision for this person.'}
 Use the snapshot horizon of ${snap.horizon_years} years.`;
 
@@ -92,12 +92,14 @@ Use the snapshot horizon of ${snap.horizon_years} years.`;
 
 Create this person's first PARALLEL life snapshot with two illustrative futures over ${horizon} years:
 
-1. "baseline" — The Familiar Path: they continue their current routine and priorities without major changes. Neutral, fair, with genuine upsides.
-2. "alternate" — ${decision ? `the path where they make this decision: <decision>${decision}</decision>` : 'the single most meaningful change in direction for this person, based on their ambition and what they want to change.'}
+1. "baseline" — The Familiar Path: they keep living the way they do now. Fair and kind, with real good parts.
+2. "alternate" — ${decision ? `the life where they make this choice: <decision>${decision}</decision>` : 'the one change that matters most for this person, based on their ambition and what they want to change.'}
+
+Make the two lives clearly different: different scene if it fits, and meters that show the real differences.
 
 Also write:
-- "title": a short snapshot title (max 8 words), e.g. "Startup now, or skills first?"
-- "insight": 2–3 sentences describing their current trajectory in a kind, specific way, ending with one opportunity, like: "You want to build a technology startup, but most of your learning time goes toward coursework. Your next opportunity may be to create a more consistent project-building routine."`;
+- "title": a short question for this snapshot, max 6 simple words, e.g. "Start a business, or finish college first?"
+- "insight": exactly 2 short, simple sentences about where they are now, ending with one small idea. Example: "You dream of starting a company, but most of your time goes to classes. Building one small project a week could help."`;
 
   const schema = {
     type: 'OBJECT',

@@ -39,11 +39,12 @@ Premise: ${scenario.premise}
 Possible scenario: ${scenario.summary}
 Main trade-off: ${scenario.tradeoff}
 
-Write "narrative": a vivid, grounded second-person story of one ordinary day about ${years} years from now, if this path played out roughly as described.
-- ${isPlus ? '220–320 words, in 3–4 short paragraphs' : '120–170 words, in 2 short paragraphs'}.
-- Cover the morning, the work or study, the environment, a small moment of satisfaction AND a small honest cost of this path.
-- Keep it believable and specific to the profile. No fame, wealth or numbers. Never claim this will happen.
-- End with one reflective line the user can take back to today.`;
+Write "narrative": a short, friendly story about one normal day, ${years} years from now, if this life happened.
+- Write it like a simple story for a friend. Use "you". Short sentences. Everyday words.
+- ${isPlus ? '180–240 words, in 3–4 short paragraphs' : 'About 120 words, in 2–3 short paragraphs'}.
+- Show the morning, what you do during the day, where you are, one happy moment AND one small hard thing about this life.
+- Keep it real and personal to the profile. No fame, riches or numbers. Never say it will definitely happen.
+- End with one short line they can think about today.`;
 
   const out = await generateJson<{ narrative: string }>({
     prompt,

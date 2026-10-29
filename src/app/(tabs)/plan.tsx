@@ -7,11 +7,13 @@ import { addCheckin, addTask, deletePlan, listCheckins, listPlans, setTaskDone }
 import type { ActionPlan, PlanTask } from '@/lib/types';
 import { useLoad } from '@/lib/useLoad';
 import { useUser } from '@/providers/AuthProvider';
+import { useGame } from '@/providers/GameProvider';
 import { colors, radius, spacing } from '@/theme';
 
 /** Path to Reality: tasks, milestones, check-ins. */
 export default function PlanTab() {
   const { user } = useUser();
+  const { award } = useGame();
   const { data, error, reload, setData } = useLoad(async () => {
     const [plans, checkins] = await Promise.all([listPlans(), listCheckins(5)]);
     return { plans, checkins };
@@ -38,6 +40,7 @@ export default function PlanTab() {
     );
     try {
       await setTaskDone(task, next);
+      if (next) award(task.is_milestone ? 'milestone' : 'task_done', task.id);
     } catch {
       reload();
     }
@@ -47,7 +50,8 @@ export default function PlanTab() {
     if (!note.trim()) return;
     setSaving(true);
     try {
-      await addCheckin(user.id, note.trim(), active?.id ?? null);
+      const checkinId = await addCheckin(user.id, note.trim(), active?.id ?? null);
+      award('checkin', checkinId);
       setNote('');
       reload();
     } finally {

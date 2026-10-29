@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Card, Label, Loading, Screen, T } from '@/components/ui';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
+import { GameProvider } from '@/providers/GameProvider';
 import { colors, spacing } from '@/theme';
 
 const navTheme = {
@@ -26,7 +27,9 @@ export default function RootLayout() {
         <StatusBar style="light" />
         {isSupabaseConfigured ? (
           <AuthProvider>
-            <RootNavigator />
+            <GameProvider>
+              <RootNavigator />
+            </GameProvider>
           </AuthProvider>
         ) : (
           <SetupNeeded />
@@ -61,6 +64,7 @@ function RootNavigator() {
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="daily" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="reveal/[id]" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="scenario/[id]" options={detail} />
         <Stack.Screen name="compare/[id]" options={{ ...detail, title: 'Life vs. Life' }} />

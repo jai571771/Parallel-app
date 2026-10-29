@@ -1,38 +1,28 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { scenarioColor, scenarioLabel } from '@/components/ScenarioCard';
+import { ScrollView, Text, View } from 'react-native';
+import { hasMeters, MeterChip } from '@/components/LifeMeters';
+import { LifeScene } from '@/components/LifeScene';
+import { PipSays } from '@/components/Pip';
+import { scenarioColor } from '@/components/ScenarioCard';
 import { Bullets, Button, Card, Chip, Disclaimer, ErrorBox, Label, Loading, Screen, T } from '@/components/ui';
-import { LIMITS } from '@/lib/limits';
 import { getSnapshot } from '@/lib/data';
+import { LIMITS } from '@/lib/limits';
 import type { Scenario } from '@/lib/types';
 import { useLoad } from '@/lib/useLoad';
+import { METERS } from '@/lib/visual';
 import { useUser } from '@/providers/AuthProvider';
 import { colors, spacing } from '@/theme';
 
 type Row = { key: string; label: string; render: (s: Scenario) => React.ReactNode; plus?: boolean };
 
 const ROWS: Row[] = [
-  { key: 'premise', label: 'The premise', render: (s) => <T variant="small">{s.premise}</T> },
-  { key: 'tradeoff', label: 'Main trade-off', render: (s) => <T variant="small" color={colors.textMuted}>{s.tradeoff}</T> },
-  { key: 'requires', label: 'Required effort', render: (s) => <Bullets items={s.requirements.slice(0, 4)} /> },
-  { key: 'risks', label: 'Uncertainty & risk', render: (s) => <Bullets items={s.risks.slice(0, 4)} color={colors.orange} />, plus: true },
-  {
-    key: 'dims',
-    label: 'Across your life',
-    plus: true,
-    render: (s) => (
-      <View style={{ gap: spacing.sm }}>
-        {s.dimensions.map((d, i) => (
-          <View key={i}>
-            <T variant="small" color={colors.text} style={{ fontWeight: '700' }}>{d.area}</T>
-            <T variant="small" color={colors.textMuted}>{d.outlook}</T>
-          </View>
-        ))}
-      </View>
-    ),
-  },
-  { key: 'change', label: 'What could change it', render: (s) => <T variant="small" color={colors.textMuted}>{s.what_could_change}</T>, plus: true },
+  { key: 'premise', label: '🎬 What you do', render: (s) => <T variant="small">{s.premise}</T> },
+  { key: 'pros', label: '👍 Good parts', render: (s) => <Bullets items={s.pros} color={colors.success} /> },
+  { key: 'cons', label: '🤔 Hard parts', render: (s) => <Bullets items={s.cons} color={colors.orange} /> },
+  { key: 'tradeoff', label: '⚖️ What you get / give up', render: (s) => <T variant="small" color={colors.textMuted}>{s.tradeoff}</T> },
+  { key: 'requires', label: '🧰 What it takes', render: (s) => <Bullets items={s.requirements} />, plus: true },
+  { key: 'risks', label: '🌧️ What could go wrong', render: (s) => <Bullets items={s.risks} color={colors.orange} />, plus: true },
 ];
 
 export default function Compare() {
@@ -50,6 +40,7 @@ export default function Compare() {
   const chosen = all.filter((s) => chosenIds.includes(s.id));
   const rows = isPlus ? ROWS : ROWS.filter((r) => !r.plus);
   const maxCompare = isPlus ? 3 : 2;
+  const showMeters = chosen.some((s) => hasMeters(s.meters));
 
   const toggle = (sid: string) => {
     const cur = chosenIds;
@@ -58,35 +49,65 @@ export default function Compare() {
     setSelected([...cur, sid]);
   };
 
-  const colWidth = chosen.length > 2 ? 200 : undefined;
+  const colWidth = chosen.length > 2 ? 190 : undefined;
+  const col = { flex: colWidth ? undefined : 1, width: colWidth };
 
   return (
     <Screen edges={[]}>
-      <T variant="h2">{snap.title}</T>
+      <PipSays mood="thinking" size={52} text="No life is 'right'. Which good parts matter most to you?" />
       {all.length > 2 ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {all.map((s) => (
-            <Chip key={s.id} label={s.title} selected={chosenIds.includes(s.id)} color={scenarioColor(s)} onPress={() => toggle(s.id)} />
+            <Chip key={s.id} label={`${s.emoji ?? ''} ${s.title}`} selected={chosenIds.includes(s.id)} color={scenarioColor(s)} onPress={() => toggle(s.id)} />
           ))}
         </View>
       ) : null}
 
       <ScrollView horizontal={chosen.length > 2} showsHorizontalScrollIndicator={false}>
         <View style={{ gap: spacing.md, flex: 1 }}>
+          {/* Scene headers */}
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             {chosen.map((s) => (
-              <Card key={s.id} accent={scenarioColor(s)} style={{ flex: colWidth ? undefined : 1, width: colWidth }} onPress={() => router.push(`/scenario/${s.id}`)}>
-                <Label color={scenarioColor(s)}>{scenarioLabel(s)}</Label>
-                <T variant="h3">{s.title}</T>
+              <Card key={s.id} accent={scenarioColor(s)} style={{ ...col, padding: 0, overflow: 'hidden' }} onPress={() => router.push(`/scenario/${s.id}`)}>
+                <LifeScene scene={s.scene} color={scenarioColor(s)} emoji={s.emoji} height={90} rounded={false} animate={false} />
+                <View style={{ padding: spacing.md }}>
+                  <T variant="h3" numberOfLines={2}>{s.title}</T>
+                </View>
               </Card>
             ))}
           </View>
+
+          {/* Meters, row by row so differences line up */}
+          {showMeters ? (
+            <Card style={{ gap: spacing.md }}>
+              <Label>📊 How life could change</Label>
+              {METERS.map(({ key, icon, label }) => (
+                <View key={key} style={{ gap: spacing.xs }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                    <Text style={{ fontSize: 16 }}>{icon}</Text>
+                    <T variant="small" color={colors.textMuted}>{label}</T>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    {chosen.map((s) => {
+                      const m = s.meters[key];
+                      return (
+                        <View key={s.id} style={{ ...col, alignItems: 'flex-start' }}>
+                          {m ? <MeterChip level={m.level} /> : <T variant="small" color={colors.textFaint}>—</T>}
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              ))}
+            </Card>
+          ) : null}
+
           {rows.map((row) => (
             <View key={row.key} style={{ gap: spacing.sm }}>
-              <Label color={colors.textFaint}>{row.label}</Label>
+              <T variant="h3">{row.label}</T>
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                 {chosen.map((s) => (
-                  <Card key={s.id} style={{ flex: colWidth ? undefined : 1, width: colWidth, padding: spacing.md }}>
+                  <Card key={s.id} style={{ ...col, padding: spacing.md }}>
                     {row.render(s)}
                   </Card>
                 ))}
@@ -98,20 +119,14 @@ export default function Compare() {
 
       {!isPlus ? (
         <Card accent={colors.violet}>
-          <T variant="h3">See the full picture</T>
+          <T variant="h3">See even more</T>
           <T color={colors.textMuted}>
-            PARALLEL Plus adds risks, life-area breakdowns and up to {LIMITS.plus.alternatesPerSnapshot + 1} paths side by side.
+            PARALLEL Plus adds "what it takes", "what could go wrong" and up to {LIMITS.plus.alternatesPerSnapshot + 1} lives side by side.
           </T>
           <Button title="Explore Plus" variant="secondary" onPress={() => router.push('/premium')} />
         </Card>
       ) : null}
 
-      <Card>
-        <T variant="h3">Which one fits your priorities?</T>
-        <T color={colors.textMuted}>
-          There is no "right" path here. Notice which trade-offs you'd happily accept, and which ones make you hesitate.
-        </T>
-      </Card>
       <Button title="Share this comparison" icon="share-social-outline" variant="secondary" onPress={() => router.push(`/share/${snap.id}`)} />
       <Disclaimer />
     </Screen>

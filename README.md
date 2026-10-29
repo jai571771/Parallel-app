@@ -14,7 +14,7 @@ An AI-powered life-exploration app. You can explore alternative versions of your
 |---|---|
 | **Welcome / Auth** | Landing hook, then email + password sign-up and sign-in |
 | **Onboarding** | Six short questions you can skip (stage, ambition, interests, habits and time, strengths and challenges, first "what if") |
-| **Future Reveal** | Your current trajectory, plus the baseline "Familiar Path" and an alternate life, shown on an animated branching map |
+| **Future Reveal** | Each possible life shown as an illustrated scene, 5 life-area meters (more / same / less, never fake numbers) and emoji good parts / hard parts, all in plain language |
 | **Scenario detail** | Premise, possible scenario, life areas, trade-off, requirements, risks, assumptions, and the **Meet your future self** story |
 | **Life vs. Life** | Side-by-side comparison (Plus adds risks, life areas and 3-way compare) |
 | **Decision Lab** | Sliders that update a transparent hours formula and a savings illustration as you move them, then "What if…" to generate a new path |
@@ -22,6 +22,9 @@ An AI-powered life-exploration app. You can explore alternative versions of your
 | **My Lives** | Archive of saved snapshots with a life map for each |
 | **Share card** | A privacy-safe "Two lives. One choice." image you share yourself (no profile data on it) |
 | **Profile** | Edit answers, plan usage, scenario-memory consent, **export my data** (JSON), **delete my data** |
+| **Daily What-If** | One tiny everyday choice per day (AI-personalised, with a 48-card hand-written backup deck). Pick a side, see the illustrated outcome, +10 XP |
+| **Game layer** | Pip the firefly guide, XP, levels (Dreamer → Visionary), daily streak 🔥 with streak freezes 🧊, a daily XP goal ring, 11 badges, quests from your plan, confetti and haptics |
+| **Reminders** | Optional daily local notification from Pip (works in Expo Go) |
 | **Premium** | Honest Free vs. Plus comparison at ₹299/month. Payments are not wired up yet ("notify me") |
 
 Free-tier limits are enforced **on the server** in the Edge Functions. See [src/lib/limits.ts](src/lib/limits.ts) and [supabase/functions/_shared/limits.ts](supabase/functions/_shared/limits.ts), and keep the two files in sync.
@@ -77,7 +80,7 @@ It will ask for the database password from step 1.
 ```bash
 npx supabase db push
 ```
-This applies [supabase/migrations/20261029000000_init.sql](supabase/migrations/20261029000000_init.sql), which creates the tables, row-level security policies, a sign-up trigger and the usage counter.
+This applies the files in [supabase/migrations/](supabase/migrations/): tables, row-level security, the sign-up trigger, the usage counter, and the game layer (XP, streaks, badges and daily cards, all awarded through the `award_xp` database function so XP can't be farmed).
 *Alternative:* paste that file into **SQL Editor → New query → Run**.
 
 ### 7. Store the Gemini key as a server secret
@@ -92,6 +95,7 @@ npx supabase secrets set GEMINI_MODEL=gemini-3.5-flash-lite GEMINI_THINKING_LEVE
 npx supabase functions deploy generate-snapshot --no-verify-jwt
 npx supabase functions deploy generate-narrative --no-verify-jwt
 npx supabase functions deploy generate-plan --no-verify-jwt
+npx supabase functions deploy daily-card --no-verify-jwt
 ```
 `--no-verify-jwt` is intentional. Each function verifies the user's session itself with `auth.getUser()`.
 

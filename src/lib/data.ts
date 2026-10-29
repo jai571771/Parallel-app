@@ -83,7 +83,10 @@ export async function listCheckins(limit = 10) {
 }
 
 export async function addCheckin(userId: string, note: string, planId: string | null) {
-  check(await supabase.from('checkins').insert({ user_id: userId, note, plan_id: planId }));
+  const row = check<{ id: string }>(
+    await supabase.from('checkins').insert({ user_id: userId, note, plan_id: planId }).select('id').single(),
+  );
+  return row.id;
 }
 
 export async function getUsage(): Promise<Usage> {

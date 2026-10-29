@@ -9,6 +9,7 @@ import { Button, Card, Chip, ErrorBox, Label, Loading, Screen, T } from '@/compo
 import { getSnapshot } from '@/lib/data';
 import { useLoad } from '@/lib/useLoad';
 import { useUser } from '@/providers/AuthProvider';
+import { useGame } from '@/providers/GameProvider';
 import { colors, spacing } from '@/theme';
 
 const QUESTIONS = ['Which path would you explore first?', 'Which version would you choose?', 'What would you change?'];
@@ -18,6 +19,7 @@ export default function Share() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useUser();
   const isPlus = profile?.plan === 'plus';
+  const { award } = useGame();
   const { data: snap, error, reload } = useLoad(() => getSnapshot(id), [id]);
   const cardRef = useRef<ShareCardRef>(null);
   const [question, setQuestion] = useState(QUESTIONS[0]);
@@ -43,6 +45,7 @@ export default function Share() {
       const uri = await captureRef(cardRef, { format: 'png', quality: 1, result: 'tmpfile' });
       if (!(await Sharing.isAvailableAsync())) throw new Error('Sharing is not available on this device.');
       await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Share my parallel lives' });
+      if (snap) award('share', snap.id);
     } catch (e) {
       setShareError(e instanceof Error ? e.message : String(e));
     } finally {

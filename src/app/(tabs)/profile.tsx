@@ -2,13 +2,17 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Switch, View } from 'react-native';
-import { Button, Card, Label, Screen, T } from '@/components/ui';
+import { Alert, Switch, Text, View } from 'react-native';
+import { Button, Card, Chip, Label, Screen, T } from '@/components/ui';
 import { deleteAllData, exportAllData, getUsage, updateProfile } from '@/lib/data';
 import { LIMITS } from '@/lib/limits';
 import { useLoad } from '@/lib/useLoad';
+import { Pip } from '@/components/Pip';
+import { BADGES, levelInfo, visibleStreak } from '@/lib/game';
+import { REMINDER_OPTIONS, scheduleDailyReminder } from '@/lib/notifications';
 import { useAuth, useUser } from '@/providers/AuthProvider';
-import { colors, spacing } from '@/theme';
+import { useGame } from '@/providers/GameProvider';
+import { colors, radius, spacing } from '@/theme';
 
 export default function ProfileTab() {
   const { user, profile } = useUser();
@@ -84,6 +88,10 @@ export default function ProfileTab() {
       <T variant="h1">{profile?.display_name || 'You'}</T>
       <T color={colors.textMuted}>{user.email}</T>
 
+      <GameStats />
+
+      <ReminderCard />
+
       <Card>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <T variant="h3">About you</T>
@@ -141,5 +149,101 @@ export default function ProfileTab() {
 
       <Button title="Sign out" variant="ghost" icon="log-out-outline" onPress={signOut} />
     </Screen>
+  );
+}
+
+function GameStats() {
+  const { game, badges } = useGame();
+  const lvl = levelInfo(game?.xp ?? 0);
+  const { streak } = visibleStreak(game);
+
+  return (
+    <Card accent={colors.violet} style={{ gap: spacing.md }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+        <Pip size={64} mood="cheer" />
+        <View style={{ flex: 1, gap: 2 }}>
+          <T variant="h2">{lvl.emoji} {lvl.name}</T>
+          <View style={{ height: 8, backgroundColor: colors.border, borderRadius: radius.pill }}>
+            <View style={{ height: 8, borderRadius: radius.pill, backgroundColor: '#FFE66D', width: `${Math.round(lvl.progress * 100)}%` }} />
+          </View>
+          <T variant="small" color={colors.textMuted}>
+            {lvl.next ? `${lvl.toNext} XP to ${lvl.next.name}` : 'Top level reached!'}
+          </T>
+        </View>
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        <Stat value={`🔥 ${streak}`} label="Day streak" />
+        <Stat value={`⚡ ${game?.xp ?? 0}`} label="Total XP" />
+        <Stat value={`🏆 ${game?.longest_streak ?? 0}`} label="Best streak" />
+        <Stat value={`🧊 ${game?.freezes ?? 0}`} label="Freezes" />
+      </View>
+      <T variant="small" color={colors.textFaint}>Every 7-day streak earns a streak freeze 🧊 (max 2). It saves your streak if you miss one day.</T>
+
+      <T variant="h3">Badges</T>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+        {Object.entries(BADGES).map(([id, b]) => {
+          const earned = badges.includes(id);
+          return (
+            <View
+              key={id}
+              style={{
+                width: '30.5%',
+                alignItems: 'center',
+                padding: spacing.sm,
+                borderRadius: radius.sm,
+                backgroundColor: earned ? colors.cardAlt : colors.bgElevated,
+                borderWidth: 1,
+                borderColor: earned ? colors.violet : colors.border,
+                opacity: earned ? 1 : 0.45,
+              }}
+            >
+              <Text style={{ fontSize: 28 }}>{earned ? b.emoji : '🔒'}</Text>
+              <T variant="small" style={{ textAlign: 'center', fontWeight: '700' }} numberOfLines={1}>{b.name}</T>
+              <T variant="small" color={colors.textFaint} style={{ textAlign: 'center', fontSize: 11, lineHeight: 14 }} numberOfLines={2}>{b.how}</T>
+            </View>
+          );
+        })}
+      </View>
+    </Card>
+  );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <View style={{ alignItems: 'center' }}>
+      <T variant="h3">{value}</T>
+      <T variant="small" color={colors.textFaint}>{label}</T>
+    </View>
+  );
+}
+
+function ReminderCard() {
+  const { game, setReminder } = useGame();
+  const [note, setNote] = useState<string | null>(null);
+  const current = game?.reminder_time ?? null;
+
+  async function pick(time: string | null) {
+    setNote(null);
+    const ok = await scheduleDailyReminder(time);
+    if (!ok) {
+      setNote('Notifications are turned off for Expo Go. Turn them on in your phone settings to get reminders.');
+      return;
+    }
+    await setReminder(time);
+    setNote(time ? `Pip will remind you every day at ${time} 🔔` : 'Reminders turned off.');
+  }
+
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <T variant="h3">🔔 Daily reminder</T>
+      <T variant="small" color={colors.textMuted}>Pip can nudge you once a day so you never lose your streak.</T>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+        {REMINDER_OPTIONS.map((o) => (
+          <Chip key={o.time} label={`${o.emoji} ${o.label} ${o.time}`} selected={current === o.time} color={colors.cyan} onPress={() => pick(o.time)} />
+        ))}
+        <Chip label="Off" selected={!current} onPress={() => pick(null)} />
+      </View>
+      {note ? <T variant="small" color={colors.cyan}>{note}</T> : null}
+    </Card>
   );
 }
