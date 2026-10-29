@@ -1,0 +1,12 @@
+# Minimal Supabase CLI config. The functions verify the user's token themselves
+# (see functions/_shared/http.ts), so gateway JWT verification is turned off.
+project_id = "parallel-app"
+
+[functions.generate-snapshot]
+verify_jwt = false
+
+[functions.generate-narrative]
+verify_jwt = false
+
+[functions.generate-plan]
+verify_jwt = false
