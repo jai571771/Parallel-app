@@ -11,7 +11,7 @@ export default function Welcome() {
       <View style={{ gap: spacing.md, marginTop: spacing.xl }}>
         <Label>PARALLEL</Label>
         <T variant="h1" style={{ fontSize: 36, lineHeight: 42 }}>
-          Meet the life you didn't choose.
+          Meet the life you didn’t choose.
         </T>
         <T color={colors.textMuted}>
           Explore other versions of your future, see the trade-offs behind each choice, and turn the path you

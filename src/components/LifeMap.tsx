@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Animated, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, View, useAnimatedValue } from 'react-native';
 import Svg, { Circle, Defs, G, Path, RadialGradient, Stop } from 'react-native-svg';
 import { colors, pathColors } from '@/theme';
 
@@ -19,8 +19,8 @@ export function LifeMap({
   animate?: boolean;
 }) {
   const [width, setWidth] = useState(0);
-  const opacity = useRef(new Animated.Value(animate ? 0 : 1)).current;
-  const scale = useRef(new Animated.Value(animate ? 0.92 : 1)).current;
+  const opacity = useAnimatedValue(animate ? 0 : 1);
+  const scale = useAnimatedValue(animate ? 0.92 : 1);
 
   useEffect(() => {
     if (!animate || width === 0) return;

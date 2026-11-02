@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, View } from 'react-native';
+import { useEffect } from 'react';
+import { Animated, View, useAnimatedValue } from 'react-native';
 import { LifeMeters } from '@/components/LifeMeters';
 import { LifeScene } from '@/components/LifeScene';
 import { PipSays } from '@/components/Pip';
@@ -58,7 +58,7 @@ export default function Reveal() {
 }
 
 function LifeCard({ scenario: s, delay }: { scenario: Scenario; delay: number }) {
-  const fade = useRef(new Animated.Value(0)).current;
+  const fade = useAnimatedValue(0);
   const color = scenarioColor(s);
 
   useEffect(() => {

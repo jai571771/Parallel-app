@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { Animated, Easing, StyleSheet, View, useAnimatedValue } from 'react-native';
 import Svg, { Circle, Defs, Ellipse, G, Path, RadialGradient, Stop } from 'react-native-svg';
 import { colors, radius, spacing } from '@/theme';
 import { T } from './ui';
@@ -8,8 +8,8 @@ export type PipMood = 'happy' | 'thinking' | 'cheer' | 'sleepy' | 'wow';
 
 /** Pip — PARALLEL's firefly guide, who "lights up the paths ahead". */
 export function Pip({ size = 72, mood = 'happy' }: { size?: number; mood?: PipMood }) {
-  const bob = useRef(new Animated.Value(0)).current;
-  const glow = useRef(new Animated.Value(0)).current;
+  const bob = useAnimatedValue(0);
+  const glow = useAnimatedValue(0);
 
   useEffect(() => {
     const bobLoop = Animated.loop(

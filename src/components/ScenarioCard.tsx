@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef } from 'react';
-import { Animated, View } from 'react-native';
+import { useEffect } from 'react';
+import { Animated, View, useAnimatedValue } from 'react-native';
 import type { Scenario } from '@/lib/types';
 import { colors, pathColors, spacing } from '@/theme';
 import { Card, Label, T } from './ui';
@@ -26,7 +26,7 @@ export function ScenarioCard({
   compact?: boolean;
 }) {
   const color = scenarioColor(scenario);
-  const fade = useRef(new Animated.Value(0)).current;
+  const fade = useAnimatedValue(0);
 
   useEffect(() => {
     Animated.timing(fade, { toValue: 1, duration: 500, delay, useNativeDriver: true }).start();

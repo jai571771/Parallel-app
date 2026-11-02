@@ -26,7 +26,8 @@
       "expo-router",
       "expo-status-bar",
       "expo-sharing",
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ],
     "scheme": "parallel",
     "backgroundColor": "#0B1020"

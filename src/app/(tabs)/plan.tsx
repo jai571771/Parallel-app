@@ -66,7 +66,7 @@ export default function PlanTab() {
         <T variant="h1">Turn a possibility into action.</T>
         <Card>
           <T color={colors.textMuted}>
-            Open any path you've explored and tap "Build this future" to get practical next steps, milestones and a
+            Open any path you’ve explored and tap “Build this future” to get practical next steps, milestones and a
             review date.
           </T>
           <Button title="Go to my lives" onPress={() => router.navigate('/lives')} />
@@ -100,7 +100,7 @@ export default function PlanTab() {
         <Card style={{ gap: spacing.md }}>
           <T variant="h3">Check in</T>
           <T variant="small" color={colors.textMuted}>
-            How's it going? Your check-ins help PARALLEL revisit your paths with your real progress.
+            How’s it going? Your check-ins help PARALLEL revisit your paths with your real progress.
           </T>
           <Field value={note} onChangeText={setNote} placeholder="e.g. Finished my first project this week" multiline />
           <Button title="Save check-in" variant="secondary" loading={saving} disabled={!note.trim()} onPress={saveCheckin} />

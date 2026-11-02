@@ -35,6 +35,8 @@ export async function scheduleDailyReminder(time: string | null): Promise<boolea
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL, {
       name: 'Daily What-If reminder',
+      // eslint-plugin-import can't see this TS enum re-export; it exists (tsc checks it).
+      // eslint-disable-next-line import/namespace
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }

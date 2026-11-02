@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Easing, Text, View, useAnimatedValue } from 'react-native';
 import Svg, { Circle, Defs, G, LinearGradient, Path, Polygon, Rect, Stop } from 'react-native-svg';
 import { sceneKey, type SceneKey } from '@/lib/visual';
 import { colors, radius } from '@/theme';
@@ -24,8 +24,8 @@ export function LifeScene({
   rounded?: boolean;
 }) {
   const [width, setWidth] = useState(0);
-  const float = useRef(new Animated.Value(0)).current;
-  const twinkle = useRef(new Animated.Value(0)).current;
+  const float = useAnimatedValue(0);
+  const twinkle = useAnimatedValue(0);
   const key = sceneKey(scene);
 
   useEffect(() => {

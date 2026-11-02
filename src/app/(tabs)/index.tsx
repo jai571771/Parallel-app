@@ -123,7 +123,7 @@ export default function Home() {
       {quests.length ? (
         <Card accent={colors.orange} style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Label color={colors.orange}>⚔️ Today's quests</Label>
+            <Label color={colors.orange}>⚔️ Today’s quests</Label>
             <T variant="small" color={colors.textFaint}>{doneTasks}/{tasks.length} done</T>
           </View>
           {quests.map((t) => (
@@ -140,7 +140,7 @@ export default function Home() {
         <Card accent={colors.cyan}>
           <Label>👋 Pick up where you left off</Label>
           <T>
-            Last time you explored "{activeAlt.title}".
+            Last time you explored “{activeAlt.title}”.
             {tasks.length ? ` You've finished ${doneTasks} of ${tasks.length} steps since.` : ''} Want to see that life again with
             your new progress?
           </T>

@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Animated, Dimensions, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Dimensions, Easing, StyleSheet, Text, View, useAnimatedValue } from 'react-native';
 import { BADGES, LEVELS } from '@/lib/game';
 import { colors, radius, spacing } from '@/theme';
 import { Pip } from './Pip';
@@ -22,7 +22,9 @@ export type CelebrationEvent =
 export function Celebrate({ event, onDone }: { event: Celebration | null; onDone: () => void }) {
   // Keep the latest callback without restarting animations when the parent re-renders.
   const done = useRef(onDone);
-  done.current = onDone;
+  useEffect(() => {
+    done.current = onDone;
+  });
   const finish = useCallback(() => done.current(), []);
   if (!event) return null;
   if (event.kind === 'xp') return <XpToast key={event.id} amount={event.amount} onDone={finish} />;
@@ -30,7 +32,7 @@ export function Celebrate({ event, onDone }: { event: Celebration | null; onDone
 }
 
 function XpToast({ amount, onDone }: { amount: number; onDone: () => void }) {
-  const anim = useRef(new Animated.Value(0)).current;
+  const anim = useAnimatedValue(0);
   useEffect(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     Animated.sequence([
@@ -62,7 +64,7 @@ function XpToast({ amount, onDone }: { amount: number; onDone: () => void }) {
 }
 
 function BigMoment({ event, onDone }: { event: Exclude<CelebrationEvent, { kind: 'xp' }>; onDone: () => void }) {
-  const pop = useRef(new Animated.Value(0)).current;
+  const pop = useAnimatedValue(0);
 
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
@@ -117,6 +119,12 @@ function BigMoment({ event, onDone }: { event: Exclude<CelebrationEvent, { kind:
   );
 }
 
+/** Deterministic 0–1 noise, so confetti looks random but rendering stays pure. */
+const noise = (i: number, seed: number) => {
+  const x = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+};
+
 const CONFETTI_COLORS = [colors.cyan, colors.violet, colors.orange, '#FFE66D', '#FF6B81', colors.success];
 
 function Confetti() {
@@ -124,11 +132,11 @@ function Confetti() {
   const pieces = useMemo(
     () =>
       Array.from({ length: 28 }, (_, i) => ({
-        x: Math.random() * width,
-        delay: Math.random() * 400,
-        rotate: Math.random() * 360,
+        x: noise(i, 1) * width,
+        delay: noise(i, 2) * 400,
+        rotate: noise(i, 3) * 360,
         color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-        size: 6 + Math.random() * 6,
+        size: 6 + noise(i, 4) * 6,
         anim: new Animated.Value(0),
       })),
     [width],

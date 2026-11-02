@@ -84,14 +84,14 @@ function SetupNeeded() {
       <Label>PARALLEL · setup</Label>
       <T variant="h1">Connect Supabase</T>
       <T color={colors.textMuted}>
-        The app can't find your Supabase keys. Create a file named .env in the project root with:
+        The app can’t find your Supabase keys. Create a file named .env in the project root with:
       </T>
       <Card style={{ gap: spacing.xs }}>
         <T variant="small" style={{ fontFamily: 'monospace' }}>EXPO_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co</T>
         <T variant="small" style={{ fontFamily: 'monospace' }}>EXPO_PUBLIC_SUPABASE_ANON_KEY=your-key</T>
       </Card>
       <T color={colors.textMuted}>
-        Then stop the dev server and run "npx expo start --clear". See README.md for the full Supabase setup guide.
+        Then stop the dev server and run “npx expo start --clear”. See README.md for the full Supabase setup guide.
       </T>
     </Screen>
   );

@@ -1,6 +1,6 @@
 import Slider from '@react-native-community/slider';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { Button, Card, Chip, Disclaimer, ErrorBox, Field, Label, Screen, T } from '@/components/ui';
 import { generateSnapshot, LimitError } from '@/lib/api';
@@ -39,10 +39,14 @@ export default function Lab() {
   const [error, setError] = useState<string | null>(null);
 
   // Prefill from deep links (Home's "life question", scenario's "change one decision").
-  useEffect(() => {
+  // Adjusting state during render (not in an effect) avoids an extra render pass.
+  const paramKey = `${params.decision ?? ''}|${params.snapshotId ?? ''}`;
+  const [seenParams, setSeenParams] = useState<string | null>(null);
+  if (paramKey !== seenParams) {
+    setSeenParams(paramKey);
     if (params.decision) setDecision(params.decision);
     if (params.snapshotId) setMode('add');
-  }, [params.decision, params.snapshotId]);
+  }
 
   const lab = useMemo(() => computeLab({ hoursPerDay, daysPerWeek, consistency, years }), [hoursPerDay, daysPerWeek, consistency, years]);
   const savings = useMemo(() => computeSavings(monthly, years, rate), [monthly, years, rate]);

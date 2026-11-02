@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Pressable, Text, View, useAnimatedValue } from 'react-native';
 import { LifeMeters } from '@/components/LifeMeters';
 import { LifeScene } from '@/components/LifeScene';
 import { PipSays } from '@/components/Pip';
@@ -36,7 +36,7 @@ export default function Daily() {
   return (
     <Screen edges={['top', 'bottom']}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Label>Today's What-If</Label>
+        <Label>Today’s What-If</Label>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="close" size={26} color={colors.textMuted} />
         </Pressable>
@@ -114,7 +114,7 @@ function OptionCard({
   disabled: boolean;
   onPress: () => void;
 }) {
-  const reveal = useRef(new Animated.Value(state === 'chosen' ? 1 : 0)).current;
+  const reveal = useAnimatedValue(state === 'chosen' ? 1 : 0);
 
   useEffect(() => {
     Animated.spring(reveal, { toValue: state === 'chosen' ? 1 : 0, friction: 7, useNativeDriver: false }).start();

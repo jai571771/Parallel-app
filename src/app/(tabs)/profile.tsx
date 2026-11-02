@@ -109,11 +109,18 @@ export default function ProfileTab() {
 
       <Card accent={plan === 'plus' ? colors.violet : undefined}>
         <Label color={colors.violetSoft}>Subscription</Label>
-        <T variant="h3">{plan === 'plus' ? 'PARALLEL Plus' : 'PARALLEL Free'}</T>
+        <T variant="h3">{plan === 'plus' ? '🌟 PARALLEL Plus' : 'PARALLEL Free'}</T>
+        {plan === 'plus' && profile?.plus_until ? (
+          <T variant="small" color={colors.textMuted}>Renews or ends on {new Date(profile.plus_until).toLocaleDateString()}</T>
+        ) : null}
         <T color={colors.textMuted}>
           {usage?.generations ?? 0} of {limits.generationsPerMonth} explorations used this month
         </T>
-        {plan === 'free' ? <Button title="See Plus" variant="secondary" onPress={() => router.push('/premium')} /> : null}
+        <Button
+          title={plan === 'plus' ? 'Manage subscription' : '🔒 Unlock deep insights with Plus'}
+          variant="secondary"
+          onPress={() => router.push('/premium')}
+        />
       </Card>
 
       <Card style={{ gap: spacing.md }}>

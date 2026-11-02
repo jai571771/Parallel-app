@@ -13,6 +13,7 @@ export type Profile = {
   change_goal: string | null;
   hours_available: number | null;
   plan: Plan;
+  plus_until: string | null;
   consent_memory: boolean;
   onboarded: boolean;
   created_at: string;

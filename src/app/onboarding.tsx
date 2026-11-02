@@ -1,7 +1,7 @@
 import Slider from '@react-native-community/slider';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, KeyboardAvoidingView, Platform, Pressable, View, useAnimatedValue } from 'react-native';
 import { Button, Card, Chip, Disclaimer, ErrorBox, Field, Label, Loading, Screen, T } from '@/components/ui';
 import { generateSnapshot, LimitError } from '@/lib/api';
 import { updateProfile } from '@/lib/data';
@@ -52,7 +52,7 @@ export default function Onboarding() {
   const [error, setError] = useState<string | null>(null);
   const [lineIdx, setLineIdx] = useState(0);
 
-  const progress = useRef(new Animated.Value(0)).current;
+  const progress = useAnimatedValue(0);
   const steps = isEdit ? 5 : 6;
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function Onboarding() {
           <>
             <Label>Step 1 · Meet yourself</Label>
             <T variant="h1">Where are you in life right now?</T>
-            <T color={colors.textMuted}>Skip anything you'd rather not answer.</T>
+            <T color={colors.textMuted}>Skip anything you’d rather not answer.</T>
             <T variant="h3">Current stage</T>
             <ChipRow options={STAGES} value={stage} onChange={setStage} />
             <T variant="h3">Age range</T>

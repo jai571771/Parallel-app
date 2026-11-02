@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { initBilling } from '@/lib/billing';
 import { getProfile } from '@/lib/data';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
       return;
     }
+    initBilling(s.user.id).catch((e) => console.warn('billing init failed', e));
     try {
       setProfile(await getProfile(s.user.id));
     } catch {

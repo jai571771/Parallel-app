@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Loads data whenever the screen gains focus. Keeps the previous data visible
@@ -11,13 +11,17 @@ export function useLoad<T>(loader: () => Promise<T>, deps: unknown[] = []) {
   const [loading, setLoading] = useState(true);
   const alive = useRef(true);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const run = useCallback(loader, deps);
+  // Always call the latest loader; refetch when `deps` change or the screen refocuses.
+  const loaderRef = useRef(loader);
+  useEffect(() => {
+    loaderRef.current = loader;
+  });
+  const depsKey = JSON.stringify(deps);
 
   const reload = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await run();
+      const result = await loaderRef.current();
       if (alive.current) {
         setData(result);
         setError(null);
@@ -27,7 +31,7 @@ export function useLoad<T>(loader: () => Promise<T>, deps: unknown[] = []) {
     } finally {
       if (alive.current) setLoading(false);
     }
-  }, [run]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -36,7 +40,9 @@ export function useLoad<T>(loader: () => Promise<T>, deps: unknown[] = []) {
       return () => {
         alive.current = false;
       };
-    }, [reload]),
+      // depsKey isn't read here on purpose: it's the caller's deps, so a change refetches.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reload, depsKey]),
   );
 
   return { data, error, loading, reload, setData };

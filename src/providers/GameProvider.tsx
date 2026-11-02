@@ -123,23 +123,35 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  // Clear the previous user's game state on sign-out / account switch (during render, not in an effect).
+  const uid = session?.user.id ?? null;
+  const [owner, setOwner] = useState(uid);
+  if (owner !== uid) {
+    setOwner(uid);
+    setGame(null);
+    setCard(null);
+    setBadges([]);
+    setTodayXp(0);
+  }
+
   useEffect(() => {
-    if (!session) {
-      setGame(null);
-      setCard(null);
-      return;
-    }
-    refresh().then(() => {
-      // Streak days follow the phone's timezone.
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      getGameState()
-        .then((g) => {
-          if (g && tz && g.timezone !== tz) setGamePrefs(g.reminder_time, tz).catch(() => {});
-        })
-        .catch(() => {});
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user.id]);
+    if (!uid) return;
+    let cancelled = false;
+    Promise.all([getGameState(), getTodayXp(), getBadges()])
+      .then(([g, xp, b]) => {
+        if (cancelled) return;
+        setGame(g);
+        setTodayXp(xp);
+        setBadges(b);
+        // Streak days follow the phone's timezone.
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (g && tz && g.timezone !== tz) setGamePrefs(g.reminder_time, tz).catch(() => {});
+      })
+      .catch((e) => console.warn('game load failed', e));
+    return () => {
+      cancelled = true;
+    };
+  }, [uid]);
 
   const value = useMemo<GameCtx>(
     () => ({ game, todayXp, badges, card, cardLoading, cardError, loadCard, answerCard, award, refresh, setReminder }),

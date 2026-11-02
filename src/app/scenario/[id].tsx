@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { hasMeters, LifeMeters } from '@/components/LifeMeters';
 import { LifeScene } from '@/components/LifeScene';
 import { PipSays } from '@/components/Pip';
+import { PlusLock } from '@/components/PlusLock';
 import { ProsCons } from '@/components/ProsCons';
 import { scenarioColor, scenarioLabel } from '@/components/ScenarioCard';
 import { Bullets, Button, Card, Disclaimer, ErrorBox, Label, Loading, Screen, T } from '@/components/ui';
@@ -87,20 +88,26 @@ export default function ScenarioDetail() {
       </Section>
 
       {s.requirements.length ? (
-        <Section icon="🧰" title="What it takes">
-          <Bullets items={s.requirements} />
-        </Section>
+        <PlusLock feature="requirements" icon="🧰" title="What it takes" teaser="The exact skills, time and habits this life needs from you.">
+          <Section icon="🧰" title="What it takes">
+            <Bullets items={s.requirements} />
+          </Section>
+        </PlusLock>
       ) : null}
 
       {s.risks.length ? (
-        <Section icon="🌧️" title="Things that could go wrong" color={colors.orange}>
-          <Bullets items={s.risks} color={colors.orange} />
-        </Section>
+        <PlusLock feature="risks" icon="🌧️" title="Things that could go wrong" teaser="See the bumps on this road before you reach them.">
+          <Section icon="🌧️" title="Things that could go wrong" color={colors.orange}>
+            <Bullets items={s.risks} color={colors.orange} />
+          </Section>
+        </PlusLock>
       ) : null}
 
-      <Section icon="🔄" title="What could change this">
-        <T color={colors.textMuted}>{s.what_could_change}</T>
-      </Section>
+      <PlusLock feature="changes" icon="🔄" title="What could change this" teaser="The turning points that could make this life better or harder.">
+        <Section icon="🔄" title="What could change this">
+          <T color={colors.textMuted}>{s.what_could_change}</T>
+        </Section>
+      </PlusLock>
 
       <Card style={{ backgroundColor: colors.bgElevated }}>
         <Pressable onPress={() => setShowGuesses((v) => !v)} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

@@ -4,6 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { hasMeters, MeterChip } from '@/components/LifeMeters';
 import { LifeScene } from '@/components/LifeScene';
 import { PipSays } from '@/components/Pip';
+import { PlusLock, type PlusFeature } from '@/components/PlusLock';
 import { scenarioColor } from '@/components/ScenarioCard';
 import { Bullets, Button, Card, Chip, Disclaimer, ErrorBox, Label, Loading, Screen, T } from '@/components/ui';
 import { getSnapshot } from '@/lib/data';
@@ -14,15 +15,16 @@ import { METERS } from '@/lib/visual';
 import { useUser } from '@/providers/AuthProvider';
 import { colors, spacing } from '@/theme';
 
-type Row = { key: string; label: string; render: (s: Scenario) => React.ReactNode; plus?: boolean };
+type Row = { key: string; label: string; render: (s: Scenario) => React.ReactNode; plus?: { feature: PlusFeature; teaser: string } };
 
 const ROWS: Row[] = [
   { key: 'premise', label: '🎬 What you do', render: (s) => <T variant="small">{s.premise}</T> },
   { key: 'pros', label: '👍 Good parts', render: (s) => <Bullets items={s.pros} color={colors.success} /> },
   { key: 'cons', label: '🤔 Hard parts', render: (s) => <Bullets items={s.cons} color={colors.orange} /> },
   { key: 'tradeoff', label: '⚖️ What you get / give up', render: (s) => <T variant="small" color={colors.textMuted}>{s.tradeoff}</T> },
-  { key: 'requires', label: '🧰 What it takes', render: (s) => <Bullets items={s.requirements} />, plus: true },
-  { key: 'risks', label: '🌧️ What could go wrong', render: (s) => <Bullets items={s.risks} color={colors.orange} />, plus: true },
+  { key: 'requires', label: '🧰 What it takes', render: (s) => <Bullets items={s.requirements} />, plus: { feature: 'requirements', teaser: 'What each life needs from you' } },
+  { key: 'risks', label: '🌧️ What could go wrong', render: (s) => <Bullets items={s.risks} color={colors.orange} />, plus: { feature: 'risks', teaser: 'The bumps on each road' } },
+  { key: 'changes', label: '🔄 What could change it', render: (s) => <T variant="small" color={colors.textMuted}>{s.what_could_change}</T>, plus: { feature: 'changes', teaser: 'The turning points of each life' } },
 ];
 
 export default function Compare() {
@@ -38,7 +40,6 @@ export default function Compare() {
   const all = snap.scenarios ?? [];
   const chosenIds = selected ?? all.slice(0, 2).map((s) => s.id);
   const chosen = all.filter((s) => chosenIds.includes(s.id));
-  const rows = isPlus ? ROWS : ROWS.filter((r) => !r.plus);
   const maxCompare = isPlus ? 3 : 2;
   const showMeters = chosen.some((s) => hasMeters(s.meters));
 
@@ -102,9 +103,8 @@ export default function Compare() {
             </Card>
           ) : null}
 
-          {rows.map((row) => (
-            <View key={row.key} style={{ gap: spacing.sm }}>
-              <T variant="h3">{row.label}</T>
+          {ROWS.map((row) => {
+            const cells = (
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                 {chosen.map((s) => (
                   <Card key={s.id} style={{ ...col, padding: spacing.md }}>
@@ -112,8 +112,20 @@ export default function Compare() {
                   </Card>
                 ))}
               </View>
-            </View>
-          ))}
+            );
+            return (
+              <View key={row.key} style={{ gap: spacing.sm }}>
+                <T variant="h3">{row.label}</T>
+                {row.plus && !isPlus ? (
+                  <PlusLock feature={row.plus.feature} icon="" title={row.plus.teaser} teaser="" compact>
+                    {cells}
+                  </PlusLock>
+                ) : (
+                  cells
+                )}
+              </View>
+            );
+          })}
         </View>
       </ScrollView>
 
@@ -121,7 +133,7 @@ export default function Compare() {
         <Card accent={colors.violet}>
           <T variant="h3">See even more</T>
           <T color={colors.textMuted}>
-            PARALLEL Plus adds "what it takes", "what could go wrong" and up to {LIMITS.plus.alternatesPerSnapshot + 1} lives side by side.
+            Unlock what each life takes, what could go wrong, its turning points, and compare up to {LIMITS.plus.alternatesPerSnapshot + 1} lives side by side.
           </T>
           <Button title="Explore Plus" variant="secondary" onPress={() => router.push('/premium')} />
         </Card>
