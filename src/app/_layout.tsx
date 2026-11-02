@@ -8,6 +8,10 @@ import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { GameProvider } from '@/providers/GameProvider';
 import { colors, spacing } from '@/theme';
 
+// Deep links (shared links, notifications) open on top of the tabs, so there's
+// always a back button and tab bar to return to.
+export const unstable_settings = { anchor: '(tabs)' };
+
 const navTheme = {
   ...DarkTheme,
   colors: {
