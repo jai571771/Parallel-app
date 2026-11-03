@@ -1,7 +1,8 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform } from 'react-native';
 import { Button, Card, ErrorBox, Field, Label, Screen, T } from '@/components/ui';
+import { LINKS } from '@/lib/links';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
 
@@ -23,7 +24,7 @@ export default function SignUp() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { display_name: name.trim() || null } },
+      options: { data: { display_name: name.trim() || null }, emailRedirectTo: LINKS.emailConfirmed },
     });
     setLoading(false);
     if (error) return setError(error.message);
@@ -47,6 +48,13 @@ export default function SignUp() {
           </Card>
         ) : null}
         <Button title="Create account" onPress={submit} loading={loading} disabled={!email || !password} />
+        <T variant="small" color={colors.textFaint} style={{ textAlign: 'center' }}>
+          By creating an account you agree to our{' '}
+          <T variant="small" color={colors.violetSoft} onPress={() => Linking.openURL(LINKS.privacy)}>
+            Privacy Policy
+          </T>
+          .
+        </T>
         <Link href="/sign-in" style={{ color: colors.violetSoft, textAlign: 'center', fontSize: 15 }}>
           Already have an account? Sign in
         </Link>

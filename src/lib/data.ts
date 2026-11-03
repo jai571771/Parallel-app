@@ -130,3 +130,10 @@ export async function deleteAllData(userId: string) {
       .eq('id', userId),
   );
 }
+
+/** Permanently deletes the account and all its data (server-side), then signs out. */
+export async function deleteAccount() {
+  const { error } = await supabase.functions.invoke('delete-account', { body: { confirm: 'DELETE' } });
+  if (error) throw new Error("We couldn't delete your account. Please try again.");
+  await supabase.auth.signOut();
+}

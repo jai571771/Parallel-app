@@ -2,10 +2,12 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Switch, Text, View } from 'react-native';
 import { Button, Card, Chip, Label, Screen, T } from '@/components/ui';
-import { deleteAllData, exportAllData, getUsage, updateProfile } from '@/lib/data';
+import { manageSubscription } from '@/lib/billing';
+import { deleteAccount, deleteAllData, exportAllData, getUsage, updateProfile } from '@/lib/data';
 import { LIMITS } from '@/lib/limits';
+import { LINKS } from '@/lib/links';
 import { useLoad } from '@/lib/useLoad';
 import { Pip } from '@/components/Pip';
 import { BADGES, levelInfo, visibleStreak } from '@/lib/game';
@@ -67,6 +69,44 @@ export default function ProfileTab() {
           },
         },
       ],
+    );
+  }
+
+  function confirmDeleteAccount() {
+    const reallyDelete = () =>
+      Alert.alert('Last check', 'Your account, lives, plans, XP and badges will be gone forever. This cannot be undone.', [
+        { text: 'Keep my account', style: 'cancel' },
+        {
+          text: 'Delete forever',
+          style: 'destructive',
+          onPress: async () => {
+            setBusy('account');
+            try {
+              await deleteAccount();
+              // Signing out swaps the navigator back to the welcome screen.
+            } catch (e) {
+              Alert.alert('Delete failed', e instanceof Error ? e.message : String(e));
+              setBusy(null);
+            }
+          },
+        },
+      ]);
+
+    Alert.alert(
+      'Delete your account?',
+      plan === 'plus'
+        ? 'Deleting your account does NOT cancel your Google Play subscription. Cancel it in Google Play first so you are not charged again.'
+        : 'This permanently deletes your login and everything you created in PARALLEL.',
+      plan === 'plus'
+        ? [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Google Play', onPress: manageSubscription },
+            { text: 'Continue', style: 'destructive', onPress: reallyDelete },
+          ]
+        : [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Continue', style: 'destructive', onPress: reallyDelete },
+          ],
     );
   }
 
@@ -144,6 +184,11 @@ export default function ProfileTab() {
         </T>
         <Button title="Export my data" icon="download-outline" variant="secondary" loading={busy === 'export'} onPress={exportData} />
         <Button title="Delete all my data" icon="trash-outline" variant="danger" loading={busy === 'delete'} onPress={confirmDelete} />
+        <Button title="Delete my account" icon="person-remove-outline" variant="danger" loading={busy === 'account'} onPress={confirmDeleteAccount} />
+        <T variant="small" color={colors.textFaint}>
+          “Delete all my data” keeps your login so you can start fresh. “Delete my account” removes everything, including
+          your login.
+        </T>
       </Card>
 
       <Card style={{ backgroundColor: colors.bgElevated }}>
@@ -153,6 +198,11 @@ export default function ProfileTab() {
           a qualified professional.
         </T>
       </Card>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing.lg }}>
+        <T variant="small" color={colors.violetSoft} onPress={() => Linking.openURL(LINKS.privacy)}>Privacy policy</T>
+        <T variant="small" color={colors.violetSoft} onPress={() => Linking.openURL(LINKS.support)}>Contact us</T>
+      </View>
 
       <Button title="Sign out" variant="ghost" icon="log-out-outline" onPress={signOut} />
     </Screen>
