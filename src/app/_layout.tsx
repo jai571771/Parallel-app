@@ -2,15 +2,12 @@ import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { HeaderBack } from '@/components/HeaderBack';
 import { Card, Label, Loading, Screen, T } from '@/components/ui';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { GameProvider } from '@/providers/GameProvider';
 import { colors, spacing } from '@/theme';
-
-// Deep links (shared links, notifications) open on top of the tabs, so there's
-// always a back button and tab bar to return to.
-export const unstable_settings = { anchor: '(tabs)' };
 
 const navTheme = {
   ...DarkTheme,
@@ -61,6 +58,8 @@ function RootNavigator() {
     headerTintColor: colors.text,
     headerShadowVisible: false,
     title: '',
+    // Always show a back arrow, even on screens opened from a link (it falls back to home).
+    headerLeft: () => <HeaderBack />,
   } as const;
 
   return (

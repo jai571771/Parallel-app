@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { PurchasesPackage } from 'react-native-purchases';
@@ -90,7 +91,7 @@ export default function Premium() {
 
   return (
     <Screen edges={['top', 'bottom']}>
-      <Pressable onPress={() => router.back()} hitSlop={12} style={{ alignSelf: 'flex-end' }}>
+      <Pressable onPress={() => goBack()} hitSlop={12} style={{ alignSelf: 'flex-end' }}>
         <Ionicons name="close" size={26} color={colors.textMuted} />
       </Pressable>
 
@@ -102,7 +103,7 @@ export default function Premium() {
             <T variant="h2">PARALLEL Plus is active</T>
             {renews ? <T color={colors.textMuted}>Renews or ends on {renews}</T> : null}
           </Card>
-          {justUnlocked ? <Button title="Explore my lives" icon="sparkles" onPress={() => router.back()} /> : null}
+          {justUnlocked ? <Button title="Explore my lives" icon="sparkles" onPress={() => goBack()} /> : null}
           <Button title="Manage in Google Play" icon="settings-outline" variant="secondary" onPress={manageSubscription} />
           <T variant="small" color={colors.textFaint} style={{ textAlign: 'center' }}>
             Cancel or change your plan anytime in Google Play. You keep Plus until the end of the period you paid for.
@@ -177,7 +178,7 @@ export default function Premium() {
             </Card>
           )}
 
-          <Button title="Keep exploring for free" variant="ghost" onPress={() => router.back()} />
+          <Button title="Keep exploring for free" variant="ghost" onPress={() => goBack()} />
           <T variant="small" color={colors.textFaint} style={{ textAlign: 'center' }}>
             Plus gives you more depth, not a “more accurate” future. All scenarios are possibilities, not predictions.
           </T>

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, Text, View, useAnimatedValue } from 'react-native';
 import { LifeMeters } from '@/components/LifeMeters';
@@ -37,7 +38,7 @@ export default function Daily() {
     <Screen edges={['top', 'bottom']}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Label>Today’s What-If</Label>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable onPress={() => goBack()} hitSlop={12}>
           <Ionicons name="close" size={26} color={colors.textMuted} />
         </Pressable>
       </View>
@@ -87,7 +88,7 @@ export default function Daily() {
                   })
                 }
               />
-              <Button title="Back home" variant="ghost" onPress={() => router.back()} />
+              <Button title="Back home" variant="ghost" onPress={() => goBack()} />
               <Countdown />
             </>
           ) : (

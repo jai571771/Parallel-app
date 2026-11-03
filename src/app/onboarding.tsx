@@ -1,5 +1,6 @@
 import Slider from '@react-native-community/slider';
 import { router, useLocalSearchParams } from 'expo-router';
+import { goBack } from '@/lib/nav';
 import { useEffect, useState } from 'react';
 import { Animated, KeyboardAvoidingView, Platform, Pressable, View, useAnimatedValue } from 'react-native';
 import { Button, Card, Chip, Disclaimer, ErrorBox, Field, Label, Loading, Screen, T } from '@/components/ui';
@@ -86,7 +87,7 @@ export default function Onboarding() {
 
       if (isEdit) {
         await refreshProfile();
-        router.back();
+        goBack();
         return;
       }
 
@@ -127,7 +128,7 @@ export default function Onboarding() {
       <Screen>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
           {step > 0 || isEdit ? (
-            <Pressable onPress={() => (step > 0 ? setStep(step - 1) : router.back())} hitSlop={12}>
+            <Pressable onPress={() => (step > 0 ? setStep(step - 1) : goBack())} hitSlop={12}>
               <T color={colors.violetSoft}>Back</T>
             </Pressable>
           ) : null}
