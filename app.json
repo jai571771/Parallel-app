@@ -39,6 +39,17 @@
       ]
     ],
     "scheme": "parallel",
-    "backgroundColor": "#0B1020"
+    "backgroundColor": "#0B1020",
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "63d85fcf-7371-44ac-bce5-97e1bd025b42"
+      }
+    },
+    "owner": "jai571771"
   }
 }
